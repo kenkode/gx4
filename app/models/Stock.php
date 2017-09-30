@@ -64,7 +64,7 @@ class Stock extends \Eloquent {
 
 
 
-	public static function addStock($item, $location, $quantity, $date){
+	public static function addStock($client, $item, $location, $quantity, $date){
 
         if (! Entrust::can('confirm_stock') ) // Checks the current user
         {
@@ -79,6 +79,7 @@ class Stock extends \Eloquent {
 		$stock->save();
 
 		$name = $item->item_make;
+		$supplier = $client->name;
         $loc = $location->name;
         $id = $stock->id;
 		$username = Confide::user()->username;
@@ -94,17 +95,17 @@ class Stock extends \Eloquent {
 
 		foreach ($users as $user) {
 
-		Notification::notifyUser($user->id,"Hello, Approval to receive stock is required","stock","confirmstock/".$id."/".$name."/".$user->id."/".$key, $key);
+		Notification::notifyUser($user->id,"Hello, Approval to receive stock is required","stock","notificationshowstock/".$id."/".$supplier."/".$name."/".$user->id."/".$key, $key);
 
-		$email = $user->email;
+		/*$email = $user->email;
 
-		$send_mail = Mail::send('emails.stock', array('name' => $user->username, 'username' => $username,'itemname' => $name,'location' => $loc,'quantity' => $quantity,'confirmer' => $user->id,'key'=>$key,'id' => $id), function($message) use($email)
+		$send_mail = Mail::send('emails.stock', array('name' => $user->username, 'username' => $username,'supplier' => $supplier,'itemname' => $name,'location' => $loc,'quantity' => $quantity,'confirmer' => $user->id,'key'=>$key,'id' => $id), function($message) use($email)
         {   
 		    $message->from('info@lixnet.net', 'Gas Express');
 		    $message->to($email, 'Gas Express')->subject('Stock Confirmation!');
 
     
-        });
+        });*/
       	}
         }else{
         $stock = new Stock;

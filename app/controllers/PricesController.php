@@ -138,7 +138,7 @@ class PricesController extends \BaseController {
 
 		foreach ($users as $user) {
 
-		Notification::notifyUser($user->id,"Approval to pricing for item".$item->item_make." is required","price","approvepriceupdate/".$client->id."/".$item->id."/".$discount."/".Confide::user()->id."/".$user->id."/".$key."/".$id,$key);
+		Notification::notifyUser($user->id,"Approval to pricing for item".$item->item_make." is required","price","notificationshowprice/".$client->id."/".$item->id."/".$discount."/".Confide::user()->id."/".$user->id."/".$key."/".$id,$key);
 
 		$email = $user->email;
 
@@ -188,6 +188,53 @@ class PricesController extends \BaseController {
 	}else{
 		return "<strong><span style='color:red'>Item Price has already approved!</span></strong>";
 	}
+	
+	}
+
+
+
+   public function notificationshowprice($client,$item,$discount,$receiver,$confirmer,$key,$id)
+	{
+
+    $price = Price::findOrFail($id);
+    if($price->confirmation_code != $key){
+    	$notification = Notification::where('confirmation_code',$key)->where('user_id',$confirmer)->first();
+		$notification->is_read = 1;
+		$notification->update();
+
+		$c = Client::find($client);
+		$clientname = $c->name;
+		$i = Item::find($item);
+		$itemmake = $i->item_make;
+
+		return View::make('prices.showitem', compact('client','item','discount','receiver','confirmer','key','id','clientname','itemmake'));
+	}else{
+		$notification = Notification::where('confirmation_code',$key)->where('user_id',$confirmer)->first();
+		$notification->is_read = 1;
+		$notification->update();
+
+		return Redirect::to('notifications/index')->withDeleteMessage('Client discount has already approved!');
+	}
+	
+	}
+
+	public function notificationapproveprice()
+	{
+
+		$price = Price::findOrFail(Input::get('id'));
+		
+		$price->date = date('Y-m-d');
+		$price->client_id = Input::get('client');		
+		$price->item_id = Input::get('item');
+		$price->Discount = Input::get('discount');	
+        $price->confirmed_id = Input::get('confirmer');
+        $price->receiver_id = Input::get('receiver');
+        $price->confirmation_code = Input::get('key');
+		$price->update();
+
+		$i = Item::find(Input::get('item'));
+
+		return Redirect::to('notifications/index')->withFlashMessage("Price update for ".$i->item_make." successfully approved!");
 	
 	}
 

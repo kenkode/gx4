@@ -56,7 +56,9 @@ $(document).ready(function(){
     <a href="{{URL::to('erpquotations/mail')}}" class="btn btn-success"> Mail Purchase Order</a>
     @endif
     @if(!Entrust::can('authorize_purchase_order') || !Entrust::can('review_purchase_order'))
+    @if($order->prepared_by == null || $order->prepared_by == "")
     <a href="{{URL::to('submitpurchaseorder/'.$order->id)}}" class="btn btn-success"> Submit For Approval</a>
+    @endif
     @endif
     @if(Entrust::can('review_purchase_order'))
     @if($order->reviewed_by == null || $order->reviewed_by == "")

@@ -4,6 +4,7 @@ Hello {{$name}},
 
 <p>Please confirm stock added by {{$username}}: </p>
 <table border="0">
+<tr><td><strong>Supplier</strong> : </td><td>{{$supplier}}</td></tr>
 <tr><td><strong>Item</strong> : </td><td>{{$itemname}}</td></tr>
 <tr><td><strong>Location</strong> : </td><td>{{$location}}</td></tr>
 <tr><td><strong>Quantity</strong> : </td><td>{{$quantity}}</td></tr>

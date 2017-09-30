@@ -108,7 +108,7 @@ if($(this).val()){
     <fieldset>
         <div class="form-group">
             <label for="username">Supplier <span style="color:red">*</span> :</label>
-            <select name="item" class="form-control" id="item" required>
+            <select name="client" class="form-control" id="client" required>
             <option> select Supplier ... </option>
                 @foreach($clients as $client)
                 @if($client->type == 'Supplier')

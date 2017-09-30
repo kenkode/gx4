@@ -161,7 +161,7 @@ class ItemsController extends \BaseController {
 
 		foreach ($users as $user) {
 
-		Notification::notifyUser($user->id,"Hello, Approval to update Item ".$name." is required","item","approveitemupdate/".$name."/".$size."/".$description."/".$purchase_price."/".$selling_price."/".$sku."/".$tag_id."/".$reorder_level."/".$receiver_id."/".$user->id."/".$key."/".$id,$key);
+		Notification::notifyUser($user->id,"Hello, Approval to update Item ".$name." is required","item","notificationshowitemupdate/".$name."/".$size."/".$description."/".$purchase_price."/".$selling_price."/".$sku."/".$tag_id."/".$reorder_level."/".$receiver_id."/".$user->id."/".$key."/".$id,$key);
 
 		$email = $user->email;
 			
@@ -170,7 +170,7 @@ class ItemsController extends \BaseController {
 		    $message->from('info@lixnet.net', 'Gas Express');
 		    $message->to($email, 'Gas Express')->subject('Item Update!');
 
-    
+   
         });
         }
 
@@ -188,6 +188,8 @@ class ItemsController extends \BaseController {
         $item->confirmed_id = Confide::user()->id;
         $item->receiver_id = Confide::user()->id;
 		$item->update();
+
+
 
 		return Redirect::route('items.index')->withFlashMessage('Item successfully updated!');
 	}
@@ -219,6 +221,47 @@ class ItemsController extends \BaseController {
 	}else{
          return "<strong><span style='color:red'>Item has already been approved!</span></strong>";
 	}
+	
+	}
+
+	public function notificationshowitem($name,$size,$description,$pprice,$sprice,$sku,$tagid,$reorderlevel,$receiver,$confirmer,$key,$id)
+	{
+
+    $item = Item::findOrFail($id);
+    if($item->confirmation_code != $key){
+    	$notification = Notification::where('confirmation_code',$key)->where('user_id',$confirmer)->first();
+		$notification->is_read = 1;
+		$notification->update();
+
+		return View::make('items.showitem', compact('name','size','description','pprice','sprice','sku','tagid','reorderlevel','receiver','confirmer','key','id'));
+	}else{
+		$notification = Notification::where('confirmation_code',$key)->where('user_id',$confirmer)->first();
+		$notification->is_read = 1;
+		$notification->update();
+
+		return Redirect::to('notifications/index')->withDeleteMessage('Item has already been approved!');
+	}
+	
+	}
+
+	public function notificationapproveitem()
+	{
+
+		$item = Item::findOrFail(Input::get('id'));
+		$item->item_make = Input::get('name');
+		$item->item_size = Input::get('item_size');
+		$item->description = Input::get('description');
+		$item->purchase_price= Input::get('pprice');
+		$item->selling_price = Input::get('sprice');
+		$item->sku= Input::get('sku');
+		$item->tag_id = Input::get('tag');
+		$item->reorder_level = Input::get('reorder');
+        $item->confirmed_id = Input::get('confirmer');
+        $item->receiver_id = Input::get('receiver');
+        $item->confirmation_code = Input::get('key');
+		$item->update();
+
+		return Redirect::to('notifications/index')->withFlashMessage("Item update for ".Input::get('name')." successfully approved!");
 	
 	}
 

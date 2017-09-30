@@ -205,10 +205,14 @@ Route::post('prices/update/{id}', 'PricesController@update');
 Route::get('prices/delete/{id}', 'PricesController@destroy');
 Route::get('prices/show/{id}', 'PricesController@show');
 Route::get('approvepriceupdate/{client}/{item}/{discount}/{receiver}/{confirmer}/{key}/{id}', 'PricesController@approveprice');
+Route::post('notificationapprovepriceupdate', 'PricesController@notificationapproveprice');
+Route::get('notificationshowprice/{client}/{item}/{discount}/{receiver}/{confirmer}/{key}/{id}', 'PricesController@notificationshowprice');
 
 Route::resource('items', 'ItemsController');
 Route::get('items/edit/{id}', 'ItemsController@edit');
 Route::get('approveitemupdate/{name}/{size}/{description}/{pprice}/{sprice}/{sku}/{tagid}/{reorderlevel}/{receiver}/{confirmer}/{key}/{id}', 'ItemsController@approveitem');
+Route::get('notificationshowitemupdate/{name}/{size}/{description}/{pprice}/{sprice}/{sku}/{tagid}/{reorderlevel}/{receiver}/{confirmer}/{key}/{id}', 'ItemsController@notificationshowitem');
+Route::post('notificationapproveitemupdate', 'ItemsController@notificationapproveitem');
 Route::post('items/update/{id}', 'ItemsController@update');
 Route::get('items/delete/{id}', 'ItemsController@destroy');
 Route::get('items/code/{id}', 'ItemsController@code');
@@ -2697,6 +2701,30 @@ Route::get('confirmstock/{id}/{name}/{confirmer}/{key}', function($id,$name,$con
 }else{
   return "<strong><span style='color:red'>Stock for item ".$name." already received!</span></strong>";
 }
+});
+
+
+Route::get('notificationshowstock/{id}/{client}/{name}/{confirmer}/{key}', function($id,$client,$name,$confirmer,$key){
+  $stock = Stock::find($id);
+  if($stock->confirmation_code != $key){
+  $notification = Notification::where('confirmation_code',$key)->where('user_id',$confirmer)->first();
+  $notification->is_read = 1;
+  $notification->update();
+
+  return View::make('stocks.showstock', compact('stock','client','name','confirmer','key'));
+}else{
+  return Redirect::to('notifications/index')->withDeleteMessage("Stock for item ".$name." already received!");
+}
+});
+
+Route::post('notificationconfirmstock', function(){
+  $stock = Stock::find(Input::get("id"));
+  $stock->is_confirmed = 1;
+  $stock->confirmed_id = Input::get("confirmer");
+  $stock->confirmation_code = Input::get("key");
+  $stock->update();
+
+  return Redirect::to('notifications/index')->withFlashMessage("Stock for item ".Input::get('item')." confirmed as received!");
 });
 
 

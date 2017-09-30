@@ -84,13 +84,14 @@ class StocksController extends \BaseController {
 		$location_id = Input::get('location');
 		$date = date('Y-m-d');
 		$item = Item::findOrFail($item_id);
+		$client = Client::findOrFail(Input::get('client'));
 		$location = Location::find($location_id);
-		$quantity = Input::get('quantity');
+		$quantity = Input::get('lease_qty');
 		/*$date = Input::get('date');*/
 
 		
 
-		Stock::addStock($item, $location, $quantity, $date);
+		Stock::addStock($client, $item, $location, $quantity, $date);
 
 		if (! Entrust::can('confirm_stock') ) // Checks the current user
         {
